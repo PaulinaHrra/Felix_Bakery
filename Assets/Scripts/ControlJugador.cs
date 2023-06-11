@@ -4,46 +4,78 @@ using UnityEngine;
 
 public class ControlJugador : MonoBehaviour
 {
-    private Rigidbody2D cuerpoDelJugador;
-    private Animator animatorDelJugador;
-    private bool EstaCaminandoEnElEspacio;
-    private float speed = 3.5f;
+     private Rigidbody2D cuerpoFelix;
+    
+    private Animator animacion;
+
+    private bool caminar;
+
+    private float speed = 5f;
+
+    //Salto
+    public LayerMask capaPiso;
+    
+    public Transform detector;
+    
+    public float fuerzaSalto;
+    
+    private bool estaPisando;
+    
+    private float radioSensor=0.07f;
 
     void Start()
     {
-        cuerpoDelJugador = GetComponent<Rigidbody2D>();
-        animatorDelJugador = GetComponent <Animator>();
+        cuerpoFelix = GetComponent<Rigidbody2D>();
+        animacion = GetComponent<Animator>();
     }
 
+    private void FixedUpdate()
+    {
+        estaPisando = Physics2D.OverlapCircle(detector.position, radioSensor, capaPiso);
+        animacion.SetBool("esSaltando", !estaPisando);
+    }
+
+    //Cosas del update
     void Update()
     {
-        if (Input.GetKeyDown (KeyCode.RightArrow))
+        
+        //Movimiento Sexy
+        if(Input.GetKey(KeyCode.RightArrow))
         {
-            animatorDelJugador.SetBool("esCaminando", true);
+            animacion.SetBool("esCaminando", true);
             transform.localRotation = Quaternion.Euler(0, 0, 0);
-            EstaCaminandoEnElEspacio = true;
-            speed = 3.5f;
+            cuerpoFelix.velocity = new Vector2(speed, cuerpoFelix.velocity.y);
+            caminar= true;
+        }
+        if(Input.GetKeyUp(KeyCode.RightArrow)) 
+        {
+             animacion.SetBool("esCaminando", false);
+             transform.localRotation = Quaternion.Euler(0, 0, 0);
+             caminar = false;
+        }
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            animacion.SetBool("esCaminando", true);
+            transform.localRotation = Quaternion.Euler(0, 180, 0);
+            cuerpoFelix.velocity = new Vector2(-speed, cuerpoFelix.velocity.y);
+            caminar = true;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+            animacion.SetBool("esCaminando", false);
+            transform.localRotation = Quaternion.Euler(0, 0, 0);
+            caminar = false;
+        }
+
+       
+        if(estaPisando) 
+        {
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                cuerpoFelix.AddForce(new Vector2(0, fuerzaSalto));
+            }
 
         }
-         if (Input.GetKeyUp (KeyCode.RightArrow))
-        {
-            animatorDelJugador.SetBool("esCaminando", false);
-             EstaCaminandoEnElEspacio = false;
-        }
-          if (Input.GetKeyDown (KeyCode.LeftArrow))
-        {
-            animatorDelJugador.SetBool("esCaminando", true);
-            transform.localRotation = Quaternion.Euler(0, 180, 0);
-             EstaCaminandoEnElEspacio = true;
-        }
-         if (Input.GetKeyUp (KeyCode.LeftArrow))
-        {
-            animatorDelJugador.SetBool("esCaminando", false);
-            EstaCaminandoEnElEspacio = false;
-        }
-        if(EstaCaminandoEnElEspacio)
-        {
-            cuerpoDelJugador.velocity = new Vector2(speed, cuerpoDelJugador.velocity.y);
-        }
+    
     }
 }
